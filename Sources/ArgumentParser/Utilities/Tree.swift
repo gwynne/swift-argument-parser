@@ -75,7 +75,7 @@ extension Tree {
   }
 }
 
-extension Tree where Element == ParsableCommand.Type {
+extension Tree where Element == BaseParsableCommand.Type {
   func path(to element: Element) -> [Element] {
     path(toFirstWhere: { $0 == element }).map { $0.element }
   }
@@ -88,7 +88,7 @@ extension Tree where Element == ParsableCommand.Type {
     children.first(where: { $0.element._commandName == name })
   }
   
-  convenience init(root command: ParsableCommand.Type) throws {
+  convenience init(root command: BaseParsableCommand.Type) throws {
     self.init(command)
     for subcommand in command.configuration.subcommands {
       if subcommand == command {
@@ -99,6 +99,6 @@ extension Tree where Element == ParsableCommand.Type {
   }
     
   enum InitializationError: Error {
-    case recursiveSubcommand(ParsableCommand.Type)
+    case recursiveSubcommand(BaseParsableCommand.Type)
   }
 }

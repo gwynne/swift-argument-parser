@@ -96,13 +96,13 @@ internal struct HelpGenerator {
     var content: String
   }
   
-  var commandStack: [ParsableCommand.Type]
+  var commandStack: [BaseParsableCommand.Type]
   var abstract: String
   var usage: Usage
   var sections: [Section]
   var discussionSections: [DiscussionSection]
   
-  init(commandStack: [ParsableCommand.Type]) {
+  init(commandStack: [BaseParsableCommand.Type]) {
     guard let currentCommand = commandStack.last else {
       fatalError()
     }
@@ -139,7 +139,7 @@ internal struct HelpGenerator {
     self.init(commandStack: [type.asCommand])
   }
 
-  static func generateSections(commandStack: [ParsableCommand.Type]) -> [Section] {
+  static func generateSections(commandStack: [BaseParsableCommand.Type]) -> [Section] {
     var positionalElements: [Section.Element] = []
     var optionElements: [Section.Element] = []
     /// Used to keep track of elements already seen from parent commands.
@@ -291,7 +291,7 @@ fileprivate extension NameSpecification {
   }
 }
 
-internal extension BidirectionalCollection where Element == ParsableCommand.Type {
+internal extension BidirectionalCollection where Element == BaseParsableCommand.Type {
   func getHelpNames() -> [Name] {
     return self.last(where: { $0.configuration.helpNames != nil })
       .map { $0.configuration.helpNames!.generateHelpNames() }

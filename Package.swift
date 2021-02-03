@@ -23,7 +23,10 @@ var package = Package(
     targets: [
         .target(
             name: "ArgumentParser",
-            dependencies: []),
+            dependencies: [],
+            swiftSettings: [
+                .unsafeFlags(["-Xfrontend", "-enable-experimental-concurrency"]),
+            ]),
         .target(
             name: "ArgumentParserTestHelpers",
             dependencies: ["ArgumentParser"]),

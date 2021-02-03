@@ -17,7 +17,7 @@ enum MessageInfo {
   case other(message: String, exitCode: Int32)
   
   init(error: Error, type: ParsableArguments.Type) {
-    var commandStack: [ParsableCommand.Type]
+    var commandStack: [BaseParsableCommand.Type]
     var parserError: ParserError? = nil
     
     switch error {

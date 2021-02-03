@@ -167,7 +167,7 @@ fileprivate struct FooCommand: ParsableCommand {
 
 extension ValidationEndToEndTests {
   func testMutationsPreserved() throws {
-    var foo = try FooCommand.parseAsRoot(["--foo"])
+    var foo = try FooCommand.parseAsRoot(["--foo"]) as! ParsableCommand
     try foo.run()
   }
 }

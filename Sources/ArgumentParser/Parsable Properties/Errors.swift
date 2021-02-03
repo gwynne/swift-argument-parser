@@ -90,7 +90,7 @@ public enum CleanExit: Error, CustomStringConvertible {
   ///
   /// - Parameter command: The command type to offer help for, if different
   ///   from the root command.
-  case helpRequest(ParsableCommand.Type? = nil)
+  case helpRequest(BaseParsableCommand.Type? = nil)
   
   /// Treat this error as a clean exit with the given message.
   case message(String)
@@ -109,7 +109,7 @@ public enum CleanExit: Error, CustomStringConvertible {
   ///
   /// - Parameter command: A command to offer help for, if different from
   ///   the root command.
-  public static func helpRequest(_ command: ParsableCommand) -> CleanExit {
+  public static func helpRequest(_ command: BaseParsableCommand) -> CleanExit {
     return .helpRequest(type(of: command))
   }
 }

@@ -10,22 +10,22 @@
 //===----------------------------------------------------------------------===//
 
 struct CommandError: Error {
-  var commandStack: [ParsableCommand.Type]
+  var commandStack: [BaseParsableCommand.Type]
   var parserError: ParserError
 }
 
 struct HelpRequested: Error {}
 
 struct CommandParser {
-  let commandTree: Tree<ParsableCommand.Type>
-  var currentNode: Tree<ParsableCommand.Type>
+  let commandTree: Tree<BaseParsableCommand.Type>
+  var currentNode: Tree<BaseParsableCommand.Type>
   var decodedArguments: [DecodedArguments] = []
   
-  var rootCommand: ParsableCommand.Type {
+  var rootCommand: BaseParsableCommand.Type {
     commandTree.element
   }
   
-  var commandStack: [ParsableCommand.Type] {
+  var commandStack: [BaseParsableCommand.Type] {
     let result = decodedArguments.compactMap { $0.commandType }
     if currentNode.element == result.last {
       return result
@@ -34,10 +34,10 @@ struct CommandParser {
     }
   }
   
-  init(_ rootCommand: ParsableCommand.Type) {
+  init(_ rootCommand: BaseParsableCommand.Type) {
     do {
       self.commandTree = try Tree(root: rootCommand)
-    } catch Tree<ParsableCommand.Type>.InitializationError.recursiveSubcommand(let command) {
+    } catch Tree<BaseParsableCommand.Type>.InitializationError.recursiveSubcommand(let command) {
       fatalError("The ParsableCommand \"\(command)\" can't have itself as its own subcommand.")
     } catch {
       fatalError("Unexpected error: \(error).")
@@ -61,7 +61,7 @@ extension CommandParser {
   ///
   /// - Returns: A node for the matched subcommand if one was found;
   ///   otherwise, `nil`.
-  fileprivate func consumeNextCommand(split: inout SplitArguments) -> Tree<ParsableCommand.Type>? {
+  fileprivate func consumeNextCommand(split: inout SplitArguments) -> Tree<BaseParsableCommand.Type>? {
     guard let (origin, element) = split.peekNext(),
       element.isValue,
       let value = split.originalInput(at: origin),
@@ -91,7 +91,7 @@ extension CommandParser {
   ///
   /// If there are remaining arguments or if no commands have been parsed,
   /// this throws an error.
-  fileprivate func extractLastParsedValue(_ split: SplitArguments) throws -> ParsableCommand {
+  fileprivate func extractLastParsedValue(_ split: SplitArguments) throws -> BaseParsableCommand {
     try checkForBuiltInFlags(split)
     
     // We should have used up all arguments at this point:
@@ -116,16 +116,16 @@ extension CommandParser {
   
   /// Extracts the current command from `split`, throwing if decoding isn't
   /// possible.
-  fileprivate mutating func parseCurrent(_ split: inout SplitArguments) throws -> ParsableCommand {
+  fileprivate mutating func parseCurrent(_ split: inout SplitArguments) throws -> BaseParsableCommand {
     // Build the argument set (i.e. information on how to parse):
     let commandArguments = ArgumentSet(currentNode.element)
     
     // Parse the arguments, ignoring anything unexpected
     let values = try commandArguments.lenientParse(split)
     
-    // Decode the values from ParsedValues into the ParsableCommand:
+    // Decode the values from ParsedValues into the BaseParsableCommand:
     let decoder = ArgumentDecoder(values: values, previouslyDecoded: decodedArguments)
-    var decodedResult: ParsableCommand
+    var decodedResult: BaseParsableCommand
     do {
       decodedResult = try currentNode.element.init(from: decoder)
     } catch let error {
@@ -193,7 +193,7 @@ extension CommandParser {
   ///
   /// - Parameter arguments: The array of arguments to parse. This should not
   ///   include the command name as the first argument.
-  mutating func parse(arguments: [String]) -> Result<ParsableCommand, CommandError> {
+  mutating func parse(arguments: [String]) -> Result<BaseParsableCommand, CommandError> {
     do {
       try handleCustomCompletion(arguments)
     } catch {
@@ -236,11 +236,11 @@ extension CommandParser {
 
 // MARK: Completion Script Support
 
-struct GenerateCompletions: ParsableCommand {
+struct GenerateCompletions: BaseParsableCommand {
   @Option() var generateCompletionScript: String
 }
 
-struct AutodetectedGenerateCompletions: ParsableCommand {
+struct AutodetectedGenerateCompletions: BaseParsableCommand {
   @Flag() var generateCompletionScript = false
 }
 
@@ -337,7 +337,7 @@ extension CommandParser {
   /// This stops building the stack if it encounters any command names that
   /// aren't in the command tree, so it's okay to pass a list of arbitrary
   /// commands. Will always return at least the root of the command tree.
-  func commandStack(for commandNames: [String]) -> [ParsableCommand.Type] {
+  func commandStack(for commandNames: [String]) -> [BaseParsableCommand.Type] {
     var node = commandTree
     var result = [node.element]
     
@@ -354,7 +354,7 @@ extension CommandParser {
     return result
   }
   
-  func commandStack(for subcommand: ParsableCommand.Type) -> [ParsableCommand.Type] {
+  func commandStack(for subcommand: BaseParsableCommand.Type) -> [BaseParsableCommand.Type] {
     let path = commandTree.path(to: subcommand)
     return path.isEmpty
       ? [commandTree.element]

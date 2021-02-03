@@ -16,7 +16,7 @@ struct HelpCommand: ParsableCommand {
   
   @Argument var subcommands: [String] = []
   
-  private(set) var commandStack: [ParsableCommand.Type] = []
+  private(set) var commandStack: [BaseParsableCommand.Type] = []
   
   init() {}
   
@@ -41,7 +41,7 @@ struct HelpCommand: ParsableCommand {
     self._subcommands = Argument(_parsedValue: .value(try container.decode([String].self, forKey: .subcommands)))
   }
   
-  init(commandStack: [ParsableCommand.Type]) {
+  init(commandStack: [BaseParsableCommand.Type]) {
     self.commandStack = commandStack
     self._subcommands = Argument(_parsedValue: .value(commandStack.map { $0._commandName }))
   }
